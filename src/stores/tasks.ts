@@ -3,15 +3,36 @@ import { ref, computed } from 'vue'
 import type { Task, TaskFilter, TaskStats } from '../types'
 import { storage, generateId, initialTasks } from '../utils/storage'
 
+function isOverdue(dueDate: string | null): boolean {
+  if (!dueDate) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const due = new Date(dueDate)
+  return due < today
+}
+
 export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([])
   const filter = ref<TaskFilter>({ status: 'all', priority: 'all' })
 
   const filteredTasks = computed(() => {
     return tasks.value.filter((task) => {
-      const statusMatch =
-        filter.value.status === 'all' ||
-        (filter.value.status === 'completed' ? task.completed : !task.completed)
+      let statusMatch = true
+
+      switch (filter.value.status) {
+        case 'completed':
+          statusMatch = task.completed
+          break
+        case 'pending':
+          statusMatch = !task.completed
+          break
+        case 'overdue':
+          statusMatch = !task.completed && isOverdue(task.dueDate)
+          break
+        default:
+          statusMatch = true
+      }
+
       const priorityMatch =
         filter.value.priority === 'all' || task.priority === filter.value.priority
       return statusMatch && priorityMatch
@@ -31,7 +52,11 @@ export const useTasksStore = defineStore('tasks', () => {
       tasks.value = [...initialTasks]
       saveTasks()
     } else {
-      tasks.value = saved
+      tasks.value = saved.map((task) => ({
+        ...task,
+        startDate: task.startDate ?? null,
+        dueDate: task.dueDate ?? null,
+      }))
     }
   }
 
@@ -79,6 +104,14 @@ export const useTasksStore = defineStore('tasks', () => {
     filter.value = { ...filter.value, ...newFilter }
   }
 
+  function reorderTasks(newOrder: Task[]) {
+    tasks.value = newOrder.map((task) => ({
+      ...task,
+      updatedAt: Date.now(),
+    }))
+    saveTasks()
+  }
+
   return {
     tasks,
     filter,
@@ -90,5 +123,6 @@ export const useTasksStore = defineStore('tasks', () => {
     deleteTask,
     toggleTask,
     setFilter,
+    reorderTasks,
   }
 })

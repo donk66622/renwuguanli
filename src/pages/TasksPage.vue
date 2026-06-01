@@ -12,7 +12,6 @@ import StatsPanel from '../components/StatsPanel.vue'
 const router = useRouter()
 const store = useTasksStore()
 const showForm = ref(false)
-const editingTask = ref<Task | null>(null)
 
 onMounted(() => {
   store.loadTasks()
@@ -23,21 +22,11 @@ const filterApplied = computed(() => {
 })
 
 function handleAddTask() {
-  editingTask.value = null
-  showForm.value = true
-}
-
-function handleEditTask(task: Task) {
-  editingTask.value = task
   showForm.value = true
 }
 
 function handleSubmitTask(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) {
-  if (editingTask.value) {
-    store.updateTask(editingTask.value.id, data)
-  } else {
-    store.addTask(data)
-  }
+  store.addTask(data)
   showForm.value = false
 }
 
@@ -49,6 +38,10 @@ function handleDeleteTask(id: string) {
 
 function handleFilterChange(filter: Partial<TaskFilter>) {
   store.setFilter(filter)
+}
+
+function handleReorder(newOrder: Task[]) {
+  store.reorderTasks(newOrder)
 }
 </script>
 
@@ -88,11 +81,11 @@ function handleFilterChange(filter: Partial<TaskFilter>) {
         <div class="lg:col-span-2">
           <FilterBar :filter="store.filter" @update:filter="handleFilterChange" />
           <TaskList
-            :tasks="store.filteredTasks"
+            :tasks="store.tasks"
             :filter-applied="filterApplied"
             @toggle="store.toggleTask"
-            @edit="handleEditTask"
             @delete="handleDeleteTask"
+            @reorder="handleReorder"
           />
         </div>
 
@@ -106,7 +99,7 @@ function handleFilterChange(filter: Partial<TaskFilter>) {
 
     <TaskForm
       :visible="showForm"
-      :task="editingTask"
+      :task="null"
       @submit="handleSubmitTask"
       @cancel="showForm = false"
     />

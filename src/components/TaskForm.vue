@@ -16,6 +16,8 @@ const emit = defineEmits<{
 const title = ref('')
 const description = ref('')
 const priority = ref<Priority>('medium')
+const startDate = ref<string | null>(null)
+const dueDate = ref<string | null>(null)
 const completed = ref(false)
 
 watch(
@@ -25,6 +27,8 @@ watch(
       title.value = newTask.title
       description.value = newTask.description
       priority.value = newTask.priority
+      startDate.value = newTask.startDate
+      dueDate.value = newTask.dueDate
       completed.value = newTask.completed
     } else {
       resetForm()
@@ -36,6 +40,8 @@ function resetForm() {
   title.value = ''
   description.value = ''
   priority.value = 'medium'
+  startDate.value = null
+  dueDate.value = null
   completed.value = false
 }
 
@@ -45,6 +51,8 @@ function handleSubmit() {
     title: title.value.trim(),
     description: description.value.trim(),
     priority: priority.value,
+    startDate: startDate.value,
+    dueDate: dueDate.value,
     completed: completed.value,
   })
   resetForm()
@@ -124,6 +132,25 @@ function handleCancel() {
                     {{ p === 'low' ? '低' : p === 'medium' ? '中' : '高' }}优先级
                   </div>
                 </label>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">开始时间</label>
+                <input
+                  v-model="startDate"
+                  type="date"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">截止时间</label>
+                <input
+                  v-model="dueDate"
+                  type="date"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                />
               </div>
             </div>
 

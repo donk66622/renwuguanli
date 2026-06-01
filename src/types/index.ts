@@ -6,12 +6,14 @@ export interface Task {
   description: string
   priority: Priority
   completed: boolean
+  startDate: string | null
+  dueDate: string | null
   createdAt: number
   updatedAt: number
 }
 
 export interface TaskFilter {
-  status: 'all' | 'pending' | 'completed'
+  status: 'all' | 'pending' | 'completed' | 'overdue'
   priority: 'all' | Priority
 }
 

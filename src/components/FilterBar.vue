@@ -13,6 +13,7 @@ const emit = defineEmits<{
 const statusOptions = [
   { value: 'all', label: '全部' },
   { value: 'pending', label: '待完成' },
+  { value: 'overdue', label: '逾期' },
   { value: 'completed', label: '已完成' },
 ] as const
 
